@@ -13,11 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
@@ -70,5 +71,11 @@ public class UserController {
             logger.error("User not found with ID: {}", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @GetMapping("/users/doctorOrStaff")
+    public ResponseEntity<List<UserDTO>> getDoctorsAndStaff() {
+        List<UserDTO> userDTOs = userService.getDoctorsAndStaff();
+        return ResponseEntity.ok(userDTOs);
     }
 }

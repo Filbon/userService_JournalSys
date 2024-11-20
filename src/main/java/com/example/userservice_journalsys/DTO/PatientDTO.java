@@ -1,24 +1,33 @@
 package com.example.userservice_journalsys.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
 public class PatientDTO {
+
     private Long id;
+    @JsonProperty("name")
     private String name;
+    @JsonProperty("birthdate")
     private LocalDate birthdate;
+    @JsonProperty("userId")
     private Long userId;  // Instead of embedding the entire User object
-    private List<Long> conditionIds; // Instead of embedding ConditionDTO, store condition IDs
+
+    @JsonProperty("conditions")
+    private List<ConditionDTO> conditions; // Instead of embedding ConditionDTO, store condition IDs
     private List<Long> encounterIds; // Store encounter IDs
     private List<Long> observationIds; // Store observation IDs (IDs referencing Observation entities)
 
     // Constructors
-    public PatientDTO(Long id, String name, LocalDate birthdate, Long userId, List<Long> conditionIds, List<Long> encounterIds, List<Long> observationIds) {
+    public PatientDTO(Long id, String name, LocalDate birthdate, Long userId, List<ConditionDTO> conditions, List<Long> encounterIds, List<Long> observationIds) {
         this.id = id;
         this.name = name;
         this.birthdate = birthdate;
         this.userId = userId;
-        this.conditionIds = conditionIds;
+        this.conditions = conditions;
         this.encounterIds = encounterIds;
         this.observationIds = observationIds;
     }
@@ -59,12 +68,12 @@ public class PatientDTO {
         this.userId = userId;
     }
 
-    public List<Long> getConditionIds() {
-        return conditionIds;
+    public List<ConditionDTO> getConditions() {
+        return conditions;
     }
 
-    public void setConditionIds(List<Long> conditionIds) {
-        this.conditionIds = conditionIds;
+    public void setConditions(List<ConditionDTO> conditions) {
+        this.conditions = conditions;
     }
 
     public List<Long> getEncounterIds() {

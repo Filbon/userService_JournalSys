@@ -9,10 +9,15 @@ import com.example.userservice_journalsys.Repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,34 +46,55 @@ public class UserService {
         // Convert the DTO to a User entity
         User user = new User();
         user.setUserName(userDTO.getUserName());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));  // Encode password
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Encode password
         user.setRole(userDTO.getRole()); // Set role from UserDTO
 
-        // For roles other than PATIENT, we might communicate with another service (e.g., Practitioner Service)
+        // Save the user in the database to generate the ID
+        User savedUser = userRepository.save(user);
+
+        // For roles other than PATIENT, we might communicate with another service
         if (userDTO.getRole() == Role.PATIENT) {
             // Create a new Patient record
             PatientDTO patientDTO = new PatientDTO();
+            patientDTO.setBirthdate(userDTO.getPatient().getBirthdate());
             patientDTO.setName(userDTO.getUserName());
-            patientDTO.setUserId(user.getId());
+            patientDTO.setUserId(savedUser.getId()); // Use the generated ID
+            patientDTO.setConditions(new ArrayList<>());
 
-            // Call Patient Service to create a new Patient record
-            restTemplate.postForObject("http://patient-service/create", patientDTO, PatientDTO.class);
+
+            // Set headers and send the POST request
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<PatientDTO> request = new HttpEntity<>(patientDTO, headers);
+
+            restTemplate.postForObject(
+                    "http://localhost:8081/api/userRole/patient/create",
+                    request,
+                    PatientDTO.class
+            );
         } else if (userDTO.getRole() == Role.DOCTOR || userDTO.getRole() == Role.STAFF) {
             // Create a new Practitioner record
             PractitionerDTO practitionerDTO = new PractitionerDTO();
             practitionerDTO.setName(userDTO.getUserName());
             practitionerDTO.setRole(userDTO.getRole());
+            practitionerDTO.setUserId(savedUser.getId());
 
-            // Call Practitioner Service to create a new Practitioner record
-            restTemplate.postForObject("http://practitioner-service/create", practitionerDTO, PractitionerDTO.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<PractitionerDTO> request = new HttpEntity<>(practitionerDTO, headers);
+
+            restTemplate.postForObject(
+                    "http://localhost:8081/api/userRole/practitioner/create",
+                    request,
+                    PractitionerDTO.class
+            );
         }
-
-        // Save the user in the database
-        User savedUser = userRepository.save(user);
 
         // Convert the saved user back to UserDTO to return
         return modelMapper.map(savedUser, UserDTO.class);
     }
+
+
 
     // Helper method to convert User to UserDTO
     private UserDTO convertUserToDTO(User user) {
@@ -120,6 +146,16 @@ public class UserService {
         }
 
         throw new RuntimeException("Invalid credentials");
+    }
+
+    public List<UserDTO> getDoctorsAndStaff() {
+        // Fetch users with roles "DOCTOR" or "STAFF"
+        List<User> users = userRepository.findByRoleIn(Arrays.asList("DOCTOR", "STAFF"));
+
+        // Map User entities to UserDTOs
+        return users.stream()
+                .map(user -> new UserDTO(user.getId(), user.getUserName(), user.getRole(), user.getPassword(), null))
+                .collect(Collectors.toList());
     }
 }
 

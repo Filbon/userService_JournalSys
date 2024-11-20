@@ -9,12 +9,15 @@ public class UserDTO {
     private Role role;
     private String password;
 
+    private PatientDTO patient;
+
     // Constructor to initialize all fields
-    public UserDTO(Long id, String userName, Role role, String password) {
+    public UserDTO(Long id, String userName, Role role, String password, PatientDTO patient) {
         this.id = id;
         this.userName = userName;
         this.role = role;
         this.password = password;
+        this.patient = patient;
     }
     public UserDTO() {
 
@@ -51,5 +54,13 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public PatientDTO getPatient() {
+        return patient;
+    }
+
+    public void setPatient(PatientDTO patient) {
+        this.patient = patient;
     }
 }

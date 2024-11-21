@@ -48,12 +48,17 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
         User user = userService.authenticate(userDTO);
         if (user != null) {
-            // Include role in the response
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "Login successful");
             response.put("role", user.getRole().name());
             response.put("userId", user.getId().toString());
             response.put("userName", user.getUserName());
+            if(user.getRole().name().equals("PATIENT")){
+                String patientId = userService.getPatientIdByUserId(user.getId()).toString();
+                response.put("patientId", patientId);
+            }
+
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -65,6 +70,7 @@ public class UserController {
 
         try {
             UserDTO userDTO = userService.getUserById(id);
+            System.out.println(userDTO.getUserName());
             logger.info("User found with ID: {}", id);
             return ResponseEntity.ok(userDTO);
         } catch (EntityNotFoundException e) {

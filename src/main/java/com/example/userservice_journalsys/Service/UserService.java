@@ -9,11 +9,10 @@ import com.example.userservice_journalsys.Repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -157,5 +156,27 @@ public class UserService {
                 .map(user -> new UserDTO(user.getId(), user.getUserName(), user.getRole(), user.getPassword(), null))
                 .collect(Collectors.toList());
     }
+
+    public Long getPatientIdByUserId(Long userId) {
+        try {
+            // Construct the URL for the Patient microservice endpoint
+            String url = "http://localhost:8081/api/userRole/patientId/byUserId/" + userId;
+
+            // Use RestTemplate to make a GET request to retrieve the patientId as Long
+            ResponseEntity<Long> response = restTemplate.getForEntity(url, Long.class);
+
+            // Return the patientId if the request was successful
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("Failed to retrieve patientId. Status code: " + response.getStatusCode());
+            }
+        } catch (RestClientException e) {
+            // Handle exceptions such as connection errors
+            throw new RuntimeException("Error occurred while retrieving patientId: " + e.getMessage(), e);
+        }
+    }
+
+
 }
 

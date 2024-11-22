@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -157,24 +158,25 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public Long getPatientIdByUserId(Long userId) {
+    public Long getUserRoleIdByUserId(Long userId) {
         try {
-            // Construct the URL for the Patient microservice endpoint
-            String url = "http://localhost:8081/api/userRole/patientId/byUserId/" + userId;
-
-            // Use RestTemplate to make a GET request to retrieve the patientId as Long
-            ResponseEntity<Long> response = restTemplate.getForEntity(url, Long.class);
-
-            // Return the patientId if the request was successful
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
-            } else {
-                throw new RuntimeException("Failed to retrieve patientId. Status code: " + response.getStatusCode());
+            Optional<User> user = userRepository.findById(userId);
+            if(user.isPresent()) {
+                String url = "http://localhost:8081/api/userRole/userRoleId/byUserId/" + userId + "/" + user.get().getRole().toString();
+                ResponseEntity<Long> response = restTemplate.getForEntity(url, Long.class);
+                // Return the patientId if the request was successful
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    return response.getBody();
+                } else {
+                    throw new RuntimeException("Failed to retrieve patientId. Status code: " + response.getStatusCode());
+                }
             }
+
         } catch (RestClientException e) {
             // Handle exceptions such as connection errors
             throw new RuntimeException("Error occurred while retrieving patientId: " + e.getMessage(), e);
         }
+        return userId;
     }
 
 

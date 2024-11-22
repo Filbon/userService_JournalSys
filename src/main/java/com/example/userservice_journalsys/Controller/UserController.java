@@ -55,8 +55,12 @@ public class UserController {
             response.put("userId", user.getId().toString());
             response.put("userName", user.getUserName());
             if(user.getRole().name().equals("PATIENT")){
-                String patientId = userService.getPatientIdByUserId(user.getId()).toString();
+                String patientId = userService.getUserRoleIdByUserId(user.getId()).toString();
                 response.put("patientId", patientId);
+            }
+            if(user.getRole().name().equals("DOCTOR")){
+                String practitionerId = userService.getUserRoleIdByUserId(user.getId()).toString();
+                response.put("practitionerId", practitionerId);
             }
 
             return ResponseEntity.ok(response);

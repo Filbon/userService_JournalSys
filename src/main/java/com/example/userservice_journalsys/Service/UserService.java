@@ -68,7 +68,7 @@ public class UserService {
             HttpEntity<PatientDTO> request = new HttpEntity<>(patientDTO, headers);
 
             restTemplate.postForObject(
-                    "http://localhost:8081/api/userRole/patient/create",
+                    "http://user-role-service:8081/api/userRole/patient/create",
                     request,
                     PatientDTO.class
             );
@@ -84,7 +84,7 @@ public class UserService {
             HttpEntity<PractitionerDTO> request = new HttpEntity<>(practitionerDTO, headers);
 
             restTemplate.postForObject(
-                    "http://localhost:8081/api/userRole/practitioner/create",
+                    "http://user-role-service:8081/api/userRole/practitioner/create",
                     request,
                     PractitionerDTO.class
             );
@@ -162,7 +162,7 @@ public class UserService {
         try {
             Optional<User> user = userRepository.findById(userId);
             if(user.isPresent()) {
-                String url = "http://localhost:8081/api/userRole/userRoleId/byUserId/" + userId + "/" + user.get().getRole().toString();
+                String url = "http://user-role-service:8081/api/userRole/userRoleId/byUserId/" + userId + "/" + user.get().getRole().toString();
                 ResponseEntity<Long> response = restTemplate.getForEntity(url, Long.class);
                 // Return the patientId if the request was successful
                 if (response.getStatusCode() == HttpStatus.OK) {

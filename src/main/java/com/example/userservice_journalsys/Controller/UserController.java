@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://kubernetes.docker.internal:30000")
+@CrossOrigin(origins = "https://frontend-journalsys.app.cloud.cbh.kth.se")
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
